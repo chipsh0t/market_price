@@ -1,6 +1,6 @@
 # from django.shortcuts import render
-from django.db.models import Sum
-from rest_framework.decorators import api_view,permission_classes
+from django.db.models import Avg
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -33,7 +33,7 @@ def search_products(request, product_name:str):
             'max_price_product':max_price_product,
             'min_price':products[0].price,
             'max_price':products[products.count()-1].price,
-            'avg_price':round(products.aggregate(total=Sum('price')).get('total')/products.count(), 2),
+            'avg_price':round(products.aggregate(average_price=Avg('price')).get('average_price'),2),
             'items_looked_up':products.count(),
             'other_recommendations':recommendations_list,
         }, status=status.HTTP_200_OK)
