@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Spyder Editor
-
-This is a temporary script file.
-"""
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -12,23 +6,35 @@ from selenium.webdriver.support.ui import WebDriverWait
 import threading
 
 
-class Product:
-    def __init__(self, link, name, price, img):
-        self.link = link
-        self.name = name
-        self.price = price
-        self.img = img
+#import Product model
+import django
+import os
+import sys
+import logging
 
-    def __str__(self):
-        return f"link : {self.link}\nname : {self.name}\nprice : {self.price}\nimg_src : {self.img}\n"
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'MarketPrice.settings')
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+django.setup()
+from marketpriceAPI.models import Product
+
+
+# class Product:
+#     def __init__(self, link, name, price, img):
+#         self.link = link
+#         self.name = name
+#         self.price = price
+#         self.img = img
+
+#     def __str__(self):
+#         return f"link : {self.link}\nname : {self.name}\nprice : {self.price}\nimg_src : {self.img}\n"
 
 
 class Scraper:
-    def __init__(self, pages, link):
+    def __init__(self, pages:int, link:str):
         self.pages = pages
         self.link = link
         self.links = []
-        self.products = []
+        # self.products = []
         self.prcs = [0, 0, 0, 0]
         self.driver1 = webdriver.Chrome()
         self.driver2 = webdriver.Chrome()
@@ -65,6 +71,7 @@ class Scraper:
                     print("no a tag")
             self.driver1.get(
                 f"https://www.mymarket.ge/ka/search/1064/iyideba-teqnika/?CatID=1064&Page={j+2}")
+                
             print(j)
 
     def getData(self, link, driver):
@@ -78,11 +85,15 @@ class Scraper:
             img_src = driver.find_element(
                 By.CSS_SELECTOR, "#thumbs-gallery-with-two-way-control > div > div > div > div > div > img").get_attribute("src")
 
-            self.products.append(
-                Product(link, name.text, price.text, img_src)
-            )
-        except:
-            print("SWW")
+            # self.products.append(
+            #     Product(link, name.text, price.text, img_src)
+            # )
+
+            #save in db
+            prod = Product(productURL=link,imageURL=img_src,name=name.text,price=float(price.text[:-1]))
+            prod.save()
+        except Exception as ex:
+            logging.info(msg=f'Couldn`t create Product object!\n  {ex}')
 
     def thread_job(self, links, driver, threadid):
         n = 0
@@ -119,8 +130,8 @@ class Scraper:
             f.write(product.__str__())
         f.close()
 
-    def save_in_db(self):
-        pass
+    # def save_in_db(self):
+    #     pass
 
 
 if __name__ == '__main__':
@@ -128,5 +139,5 @@ if __name__ == '__main__':
         1, "https://www.mymarket.ge/ka/search/1064/iyideba-teqnika/?CatID=1064&Page=1")
 
     scraper.scrape()
-    scraper.save_in_file("data.txt")
-    scraper.save_in_db()
+    # scraper.save_in_file("data.txt")
+    # scraper.save_in_db()

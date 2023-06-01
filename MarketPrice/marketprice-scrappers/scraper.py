@@ -64,7 +64,7 @@ def dr(driver):
     except:
         print("no baners")
     ##link=driver.find_element(By.CSS_SELECTOR, "#searchProducts > div.m-0 > div > div:nth-child(1) > a")
-pages=1
+pages=10
 def get_links(driver): 
     links=[]
     for j in range(pages):
