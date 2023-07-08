@@ -1,0 +1,15 @@
+.product{
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 50px;
+    margin-right: 20px;
+}
+
+.product > a{
+    display:flex;
+    flex-direction: column;
+    text-decoration: none;
+}
+.card{
+    width: 10rem;
+}
