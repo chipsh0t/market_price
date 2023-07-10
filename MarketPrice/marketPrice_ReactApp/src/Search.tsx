@@ -46,6 +46,7 @@ const baseContent={
 
 }
 
+//http://127.0.0.1:8000/search_products/
 function Search(){
     let keyWord=""
     const [rel,setRel]=useState("")
