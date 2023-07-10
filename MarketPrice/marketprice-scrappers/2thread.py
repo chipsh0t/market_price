@@ -136,7 +136,7 @@ class Scraper:
 
 if __name__ == '__main__':
     scraper = Scraper(
-        1, "https://www.mymarket.ge/ka/search/1064/iyideba-teqnika/?CatID=1064&Page=1")
+        20, "https://www.mymarket.ge/ka/search/1064/iyideba-teqnika/?CatID=1064&Page=1")
 
     scraper.scrape()
     # scraper.save_in_file("data.txt")
