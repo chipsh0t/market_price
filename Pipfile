@@ -8,6 +8,7 @@ django = "==4.2.1"
 djangorestframework = "==3.14.0"
 selenium = "==4.9.0"
 django-cors-headers = "==4.0.0"
+numpy = "*"
 
 [dev-packages]
 

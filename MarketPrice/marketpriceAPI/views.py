@@ -147,16 +147,16 @@ def interactions(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def save_interaction(request):
+def save_interaction(request,product_id):
     #getting request data
     user_id = request.user.id
-    product_id = request.data.get('product',None)
 
-    if not product_id:
-        return Response({'detail':'Please correctly provide product id !'}, status=status.HTTP_400_BAD_REQUEST)
+    # if not product_id:
+    #     return Response({'detail':'Please correctly provide product id !'}, status=status.HTTP_400_BAD_REQUEST)
     
     #check if both user and product exist in database
     try:
+        product_id = int(product_id)
         user = User.objects.get(pk = user_id)
         product = Product.objects.get(pk = product_id)
         interaction_serializer = InteractionSerializer(data={"user":user_id,"product":product_id})
