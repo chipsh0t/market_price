@@ -1,0 +1,14 @@
+.Search{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    width:50%;
+    padding-top: 5rem;
+    justify-content: center;
+}
+.innersearch{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
