@@ -1,20 +1,18 @@
-# from django.shortcuts import render
-from django.db.models import Avg
-from django.contrib.auth import login,authenticate,logout
-# from django.contrib.auth.password_validation import validate_password
+from django.db.models import Avg,Count  
+from django.db import IntegrityError
+from django.contrib.auth import login,logout
+from django.core.exceptions import ObjectDoesNotExist
+
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.authentication import SessionAuthentication # IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.core.exceptions import ValidationError
+from . models import Product, User, Interaction
+from . serializers import ProductSerializer, UserSerializer, UserRegisterSerializer, UserLoginSerializer, InteractionSerializer
 
-from . models import Product, User
-from . serializers import ProductSerializer, UserSerializer, UserRegisterSerializer, UserLoginSerializer
-# from .validators import validate_password
-
-import random
+import numpy as np
 # Create your views here.
 
 # User authentication views start
@@ -48,24 +46,11 @@ def register_user(request):
         # new_user.errors['password'] = 'bruh'
         return Response(register_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-
-    
-    #try creating new user
-    # try:
-    #     pass
-    # except:
-    #     pass
-
-    # login(request,new_user)
-
-
-
 # {
 #   "username":"user1",
 #    "password":"12345678",
 #     "confirmation":"12345678"
 # }
-
 
 
 @api_view(['POST'])
@@ -97,8 +82,7 @@ def login_user(request):
 # }
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
-# @authentication_classes()
+@permission_classes([IsAuthenticated])
 def logout_user(request):
     logout(request)
     return Response(status=status.HTTP_200_OK)
@@ -107,33 +91,100 @@ def logout_user(request):
 
 @api_view(['GET'])
 def index(request):
-    products = Product.objects.all()
-    serializer = ProductSerializer(products, many=True)
+    #returning top4 viewed items on index page
+    queryset_sorted = Product.objects.annotate(interaction_count = Count('interacting_item')).order_by('-interaction_count')[:4]
+    serializer = ProductSerializer(queryset_sorted, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 def search(request, product_name:str):
-    # products = Product.objects.filter(price__gte=300.0)
     products = Product.objects.filter(name__icontains=product_name)
-    if products.count() != 0:
+    products_looked_up = products.count()
+    if products_looked_up != 0:
         min_price_product= ProductSerializer(products[0]).data
         max_price_product = ProductSerializer(products[products.count()-1]).data
-        recommendations_num = 5
-        recommendations_list=[]
-        for _ in range(recommendations_num):
-            recommendations_list.append(ProductSerializer(products[random.randint(0,products.count()-1)]).data)
+        min_price = min_price_product["price"]
+        max_price = max_price_product["price"]
+        avg_price = round(products.aggregate(average_price=Avg('price')).get('average_price'),2)
 
+        #finding price ranges for graph
+        range_number = 10
+        graph_prices = np.linspace(min_price,max_price,range_number)
+        graph_prices_coupled = []
+        #finding amount of items in each price range
+        graph_labels = []
+        for i in range(len(graph_prices)-1):
+            graph_prices_coupled.append(f'{int(graph_prices[i])}-{int(graph_prices[i+1])}')
+            product_count_in_current_range = products.filter(price__gte=graph_prices[i], price__lte=graph_prices[i+1]).count()
+            graph_labels.append(product_count_in_current_range)
+
+        #loading recommendations for search page
+        less_than_average=[ProductSerializer(product).data for product in products.filter(price__lte=avg_price)][-2:]
+        more_than_average=[ProductSerializer(product).data for product in products.filter(price__gte=avg_price)][:2]
+        
         return Response({
             'min_price_product':min_price_product,
             'max_price_product':max_price_product,
-            'min_price':products[0].price,
-            'max_price':products[products.count()-1].price,
-            'avg_price':round(products.aggregate(average_price=Avg('price')).get('average_price'),2),
-            'items_looked_up':products.count(),
-            'other_recommendations':recommendations_list,
+            'min_price':min_price,
+            'max_price':max_price,
+            'avg_price':avg_price,
+            'items_looked_up':products_looked_up,
+            'graph_prices':graph_prices_coupled,
+            'graph_labels':graph_labels,
+            'search_recommendations':less_than_average+more_than_average,
         }, status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    # serializer = ProductSerializer(products, many=True)
-    # return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def interactions(request):
+    interactions = [InteractionSerializer(interaction).data for interaction in Interaction.objects.all()] 
+    return Response({'interactions':interactions},
+                    status = status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def save_interaction(request):
+    #getting request data
+    user_id = request.user.id
+    product_id = request.data.get('product',None)
+
+    if not product_id:
+        return Response({'detail':'Please correctly provide product id !'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    #check if both user and product exist in database
+    try:
+        user = User.objects.get(pk = user_id)
+        product = Product.objects.get(pk = product_id)
+        interaction_serializer = InteractionSerializer(data={"user":user_id,"product":product_id})
+        if interaction_serializer.is_valid():
+            try:
+                interaction_serializer.save()
+            except IntegrityError:
+                #interaction object exists
+                return Response({'detail':'This interaction already exists !'},status=status.HTTP_400_BAD_REQUEST)
+            #successful save
+            return Response(interaction_serializer.data,status=status.HTTP_201_CREATED)
+    except Exception:
+        return Response({'detail':'Product you asked for couldn`t be found !'}, status=status.HTTP_404_NOT_FOUND)
+
+# {"user":"11","product":"12"}
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile_page(request):
+    user_id = request.user.id
+    try:
+        user = User.objects.get(pk = user_id)
+        interactions = Interaction.objects.filter(user=user)[:4]
+        interactions_serializer = InteractionSerializer(interactions, many=True)
+        return Response({'interactions':interactions_serializer.data,
+                         'profile_recommendations':[]
+                        },status=status.HTTP_200_OK)
+    except Exception:
+        return Response({'detail':'User can`t be found !'}, status=status.HTTP_404_NOT_FOUND)
+
+
