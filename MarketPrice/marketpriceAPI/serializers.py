@@ -1,7 +1,7 @@
-from rest_framework.serializers import ModelSerializer, Serializer, CharField, ValidationError
+from rest_framework.serializers import ModelSerializer, Serializer, CharField, SlugRelatedField, SerializerMethodField,ValidationError
 from django.db import IntegrityError
 from django.contrib.auth import authenticate
-from .models import Product, User
+from .models import Product, User, Interaction
 
 
 #serializer for user model
@@ -49,3 +49,14 @@ class ProductSerializer(ModelSerializer):
         model = Product
         fields ='__all__'
     
+    # interaction_counter = SerializerMethodField(method_name='count_interactions_with_product')
+
+    # def count_interactions_with_product(self,obj):
+    #     interaction_counter = Interaction.objects.filter(product=obj).count()
+    #     return interaction_counter
+
+
+class InteractionSerializer(ModelSerializer):
+    class Meta:
+        model = Interaction
+        fields = '__all__'
