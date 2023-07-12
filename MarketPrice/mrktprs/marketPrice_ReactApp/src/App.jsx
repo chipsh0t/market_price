@@ -17,10 +17,16 @@ function App() {
       <div className='app' id="app">
         <BrowserRouter>
         <Routes>
-          <Route index element={<FirstPage/>}></Route>
+          {/* <Route index element={<FirstPage/>}></Route>
           <Route path="ProfilePage" element={<ProfilePage/>}></Route>
           <Route path="link2"  element={<Hdr/>}></Route>
           <Route path="link3"  element={<Hdr/>}></Route>
+          <Route path='/search/:query' element={<Search />} /> */}
+          <Route path='/' element={<FirstPage />} />
+          <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/link2' element={<Hdr />} />
+          <Route path='/link3' element={<Hdr />} />
+          {/* <Route path='/search/:query' element={<Search />} /> */}
         </Routes>
         </BrowserRouter>
       </div>
@@ -28,3 +34,4 @@ function App() {
 }
 
 export default App 
+

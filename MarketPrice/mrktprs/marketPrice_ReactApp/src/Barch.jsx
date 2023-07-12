@@ -27,7 +27,7 @@ ChartJS.register(
       title: {
         display: true,
         text: "პროუქტის რაოდენობა ფასების მიხედვით",
-      },
+      }
     },
   };
   
@@ -42,7 +42,7 @@ export default function Barch(props){
         {
           label: 'რაოდენობა',
           data: props.data ,
-          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          backgroundColor: 'rgb(13, 110, 253)',
         }
      
       ],

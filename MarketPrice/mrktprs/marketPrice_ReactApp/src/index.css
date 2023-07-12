@@ -1,3 +1,9 @@
-.body{
-    background-color: rgb(124, 184, 236);
+body{
+    background-color: white;
 }
+
+/* img{
+    width:100%;
+    max-height: 200 px;
+    object-fit: cover;
+} */
