@@ -1,0 +1,21 @@
+.Search{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    width:50%;
+    margin-top: 1rem;
+    justify-content: center;
+}
+.innersearch{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+#h6err{
+    color:crimson;
+}
+#grcn{
+    display:flex;
+    flex-direction: column;
+}

@@ -1,0 +1,23 @@
+.content{
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.mm{
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.minmax{
+    display:flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+.recoms{
+    display:flex;
+    flex-direction:row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}

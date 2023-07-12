@@ -1,0 +1,15 @@
+
+.card{
+    width: 15rem;
+    border-style: bold;
+    border-radius: 10% 10% 10% 10%;
+}
+.imgholder{
+    width:15rem;
+    height:15rem;
+}
+img{
+    width:15rem;
+    height:15rem;
+    object-fit: fill;
+}

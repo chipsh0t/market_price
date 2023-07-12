@@ -1,0 +1,38 @@
+.navbar{
+    width:100%;
+    
+    
+}
+.collapse {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+ }
+.usernameh5{
+    margin-right: 2rem;
+}
+/*.header{
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width:50%;
+    padding-bottom: 50px;
+}
+.sign {
+   display: flex;
+   flex-direction: row-reverse;
+}
+.nav{
+    display:flex;
+    flex-direction: row;
+    
+}
+.nav :first-child{
+    font-family: Arial, Helvetica, sans-serif;
+    font: 1em sans-serif;
+    font-size: xx-large;
+    font-weight: bold;
+}
+.nav >a{
+    margin-right: 3rem;
+}*/
