@@ -2,6 +2,8 @@ from django.db.models import Avg,Count
 from django.db import IntegrityError
 from django.contrib.auth import login,logout
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.csrf import csrf_exempt
+
 
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny,IsAuthenticated
@@ -19,6 +21,7 @@ import numpy as np
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@csrf_exempt
 def register_user(request):
     username = request.data.get('username',None)
     password = request.data.get('password',None)
@@ -54,7 +57,8 @@ def register_user(request):
 
 
 @api_view(['POST'])
-@authentication_classes([SessionAuthentication])
+# @authentication_classes([SessionAuthentication])
+@csrf_exempt
 def login_user(request):
     data = request.data
     username = data.get('username',None)
@@ -82,7 +86,8 @@ def login_user(request):
 # }
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
+@csrf_exempt
 def logout_user(request):
     logout(request)
     return Response(status=status.HTTP_200_OK)
@@ -146,10 +151,11 @@ def interactions(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@csrf_exempt
+# @permission_classes([IsAuthenticated])
 def save_interaction(request,product_id):
     #getting request data
-    user_id = request.user.id
+    user_id = request.data.get('id')
 
     # if not product_id:
     #     return Response({'detail':'Please correctly provide product id !'}, status=status.HTTP_400_BAD_REQUEST)
@@ -174,15 +180,16 @@ def save_interaction(request,product_id):
 # {"user":"11","product":"12"}
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def profile_page(request):
-    user_id = request.user.id
+# @permission_classes([IsAuthenticated])
+def profile_page(request, id):
     try:
-        user = User.objects.get(pk = user_id)
+        user = User.objects.get(pk = id)   
         interactions = Interaction.objects.filter(user=user)[:4]
-        interactions_serializer = InteractionSerializer(interactions, many=True)
-        return Response({'interactions':interactions_serializer.data,
-                         'profile_recommendations':[]
+        interacted_products_serialized = [ProductSerializer(product.product).data for product in list(interactions)]
+        top_4_cheapest = [ProductSerializer(product).data for product in Product.objects.all()[:4]]
+        # interactions_serializer = InteractionSerializer(interactions, many=True)
+        return Response({'interacted_products':interacted_products_serialized,
+                         'profile_recommendations': top_4_cheapest
                         },status=status.HTTP_200_OK)
     except Exception:
         return Response({'detail':'User can`t be found !'}, status=status.HTTP_404_NOT_FOUND)
